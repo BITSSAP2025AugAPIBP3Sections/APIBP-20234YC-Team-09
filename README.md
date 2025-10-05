@@ -1,5 +1,4 @@
 # APIBP-20234YC-Team-09
-2023 4y
 
 ---
 
@@ -28,10 +27,4 @@ A full stack banking application designed to provide secure and efficient bankin
 **Tools:** Postman, Swagger
 
 ---
-
-full-stack-banking-application/
-├── backend/        # Spring Boot
-├── frontend/       # React
-├── README.md
-└── ...
 
