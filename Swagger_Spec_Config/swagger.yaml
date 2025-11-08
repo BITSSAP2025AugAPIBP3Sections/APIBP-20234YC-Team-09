@@ -1,150 +1,275 @@
 openapi: 3.0.3
 info:
-  title: FlowCast Post Service
+  title: Banking Application API
+  description: API specifications for a full-stack Banking Application providing secure banking operations.
   version: 1.0.0
+  contact:
+    name: Team BankingApp
+    email: team@bankingapp.com
 
 servers:
-  - url: /api/v1/posts
+  - url: https://api.bankingapp.com/v1
+    description: Production Server
+  - url: https://staging.bankingapp.com/v1
+    description: Staging Server
+
+tags:
+  - name: Users
+    description: Endpoints related to user account management.
+  - name: Accounts
+    description: Endpoints related to bank accounts.
+  - name: Transactions
+    description: Endpoints related to fund transfers and history.
+  - name: Internationalization
+    description: APIs supporting multiple languages (German, English, etc.)
 
 paths:
-  /:
+  /users/register:
     post:
-      summary: Create new post
-      security:
-        - bearerAuth: []
+      tags: [Users]
+      summary: Register a new user
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Post'
+              $ref: '#/components/schemas/UserRegisterRequest'
       responses:
-        '201':
-          description: Post created
-
-    get:
-      summary: List all posts of logged-in user
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: List of posts
+        "201":
+          description: User created successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /{id}:
-    get:
-      summary: Get post details
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Post details
-
-    put:
-      summary: Update a post
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+  /users/login:
+    post:
+      tags: [Users]
+      summary: Authenticate and login user
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Post'
+              $ref: '#/components/schemas/UserLoginRequest'
       responses:
-        '200':
-          description: Post updated
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-    delete:
-      summary: Delete a post
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Post deleted
-
-  /media/upload:
-    post:
-      summary: Upload media
-      responses:
-        '200':
-          description: Media uploaded
-
-  /templates:
+  /accounts/{accountId}/balance:
     get:
-      summary: Get templates
+      tags: [Accounts]
+      summary: Get account balance
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          description: Account ID of the user
       responses:
-        '200':
-          description: Templates list
-    post:
-      summary: Create template
-      responses:
-        '201':
-          description: Template created
+        "200":
+          description: Balance fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /templates/{id}:
-    put:
-      summary: Update template
+  /transactions:
+    post:
+      tags: [Transactions]
+      summary: Initiate a new transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequest'
+      responses:
+        "201":
+          description: Transaction successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        "400":
+          description: Invalid transaction request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /internationalization/example:
+    get:
+      tags: [Internationalization]
+      summary: Example endpoint supporting multiple languages (German → English)
+      description: |
+        Demonstrates how the same API can return localized messages based on the **Accept-Language** header.
+        - `Accept-Language: de-DE` → German response  
+        - `Accept-Language: en-US` → English response
       parameters:
-        - in: path
-          name: id
-          required: true
+        - in: header
+          name: Accept-Language
           schema:
             type: string
+            example: de-DE
+          required: false
+          description: Preferred language for response (e.g., `en-US`, `de-DE`)
       responses:
-        '200':
-          description: Template updated
-    delete:
-      summary: Delete template
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Template deleted
+        "200":
+          description: Localized success message
+          content:
+            application/json:
+              examples:
+                English:
+                  summary: English Response
+                  value:
+                    status: "success"
+                    message: "Your account balance has been fetched successfully."
+                German:
+                  summary: German Response
+                  value:
+                    status: "erfolg"
+                    nachricht: "Ihr Kontostand wurde erfolgreich abgerufen."
+        "400":
+          description: Localized error message
+          content:
+            application/json:
+              examples:
+                English:
+                  summary: English Error
+                  value:
+                    status: "error"
+                    code: 400
+                    message: "Invalid account ID."
+                German:
+                  summary: German Error
+                  value:
+                    status: "fehler"
+                    code: 400
+                    nachricht: "Ungültige Kontonummer."
+
+components:
+  schemas:
+    UserRegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    UserLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token for authenticated access
+        expiresIn:
+          type: string
+          example: "3600s"
+
+    BalanceResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+        balance:
+          type: number
+          format: double
+        currency:
+          type: string
+          example: "INR"
+
+    TransactionRequest:
+      type: object
+      required: [fromAccountId, toAccountId, amount]
+      properties:
+        fromAccountId:
+          type: string
+        toAccountId:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+          example: "INR"
+
+    TransactionResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+        status:
+          type: string
+          example: "SUCCESS"
+        timestamp:
+          type: string
+          format: date-time
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "error"
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Invalid request parameters"
+
+security:
+  - bearerAuth: []
 
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
-
-  schemas:
-    Post:
-      type: object
-      properties:
-        id:
-          type: string
-        caption:
-          type: string
-        platforms:
-          type: array
-          items:
-            type: string
-        media:
-          type: string
-        status:
-          type: string
+      bearerFormat: JWT
