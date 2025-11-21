@@ -1,5 +1,12 @@
 package com.sap.bankingapplication;
 
+/**
+ * SecurityConfig
+ *
+ * Created by Nakul
+ * (Only comments added — no functional changes)
+ */
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
