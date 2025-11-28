@@ -31,10 +31,10 @@ const helpLinks = [
 ];
 
 const socialLinks = [
-  { icon: <GitHubIcon />, label: 'GitHub', href: 'https://github.com/hoangsonww' },
-  { icon: <LinkedInIcon />, label: 'LinkedIn', href: 'https://www.linkedin.com/in/hoangsonw/' },
-  { icon: <LanguageIcon />, label: 'Portfolio', href: 'https://sonnguyenhoang.com/' },
-  { icon: <EmailIcon />, label: 'Email', href: 'mailto:hoangson091104@gmail.com' },
+
+  { icon: <LinkedInIcon />, label: 'LinkedIn', href: 'https://www.linkedin.com/in/suryansh-pandey-906012239' },
+
+  { icon: <EmailIcon />, label: 'Email', href: 'mailto:27744.suryanshpandey@gmail.com' },
 ];
 
 const policyLinks = [
@@ -49,7 +49,7 @@ function Footer() {
   const [email, setEmail] = React.useState('');
   const { notify } = useNotifier();
 
-  const handleSubmit = event => {
+  const handleSubmit = async event => {
     event.preventDefault();
     const trimmed = email.trim();
     if (!trimmed) {
@@ -63,8 +63,28 @@ function Footer() {
     }
 
     notify({ severity: 'info', message: 'Adding you to the insider list…', autoHideDuration: 2200 });
-    notify({ severity: 'success', message: 'You are on the VIP list! Look out for our next drop.' });
-    setEmail('');
+
+    try {
+      const response = await fetch('http://localhost:8000/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: trimmed }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        notify({ severity: 'success', message: 'You are on the VIP list! Look out for our next drop.' });
+        setEmail('');
+      } else {
+        notify({ severity: 'error', message: data.error || 'Subscription failed. Please try again.' });
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      notify({ severity: 'error', message: 'Unable to subscribe right now. Please try again later.' });
+    }
   };
 
   return (
@@ -169,9 +189,7 @@ function Footer() {
         <Divider sx={{ my: 5, borderColor: 'rgba(148,163,184,0.25)' }} />
 
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }}>
-          <Typography variant="body2" sx={{ color: 'rgba(226,232,240,0.7)' }}>
-            © {new Date().getFullYear()} Fusion Electronics. Crafted in California & powered worldwide.
-          </Typography>
+
           <Stack direction="row" spacing={2} sx={{ color: 'rgba(226,232,240,0.7)', display: { xs: 'none', sm: 'flex' } }}>
             {policyLinks.map(link => (
               <MuiLink key={link.to} component={RouterLink} to={link.to} color="inherit" underline="none">

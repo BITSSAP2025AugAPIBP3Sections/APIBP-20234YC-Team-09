@@ -10,6 +10,16 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * /api/orders/track:
  *   post:
  *     summary: Get the current status of an order
+ *     description: |
+ *       **Stakeholder:** Guest User, Registered Customer
+ *       **Access Level:** Public (No Authentication Required)
+ *       
+ *       Retrieves the real-time status and history of an order using the order number and email address.
+ *       
+ *       **Error Handling:**
+ *       - Returns 400 if order number or email is missing/invalid.
+ *       - Returns 404 if the order is not found.
+ *       - Returns 500 for internal server errors.
  *     tags:
  *       - Orders
  *     requestBody:
@@ -25,12 +35,14 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  *               orderNumber:
  *                 type: string
  *                 example: FE-123456
+ *                 description: The unique order identifier (e.g., FE-123456)
  *               email:
  *                 type: string
  *                 format: email
+ *                 description: The email address used for the order
  *     responses:
  *       200:
- *         description: Order status payload
+ *         description: Order status payload retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -61,7 +73,9 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  *       404:
  *         description: Order not found
  *       400:
- *         description: Validation error
+ *         description: Validation error (invalid format or missing fields)
+ *       500:
+ *         description: Server error
  */
 
 router.post('/track', async (req, res) => {

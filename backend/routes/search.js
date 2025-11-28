@@ -7,7 +7,14 @@ const Product = require('../models/product');
  * /api/search:
  *   get:
  *     summary: Search for products
- *     description: Retrieve a list of products that match the provided search query in their name or description. If no query is provided, it returns all products.
+ *     description: |
+ *       **Stakeholder:** Guest User, Registered Customer
+ *       **Access Level:** Public (No Authentication Required)
+ *       
+ *       Retrieve a list of products that match the provided search query in their name or description. If no query is provided, it returns all products.
+ *       
+ *       **Error Handling:**
+ *       - Returns 500 for internal server errors.
  *     tags:
  *       - Search
  *     parameters:

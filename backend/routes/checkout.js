@@ -27,7 +27,16 @@ async function generateOrderNumber() {
  * /api/checkout/create-order:
  *   post:
  *     summary: Create a new order
- *     description: Creates a new order with the provided details such as items, customer information, and payment details.
+ *     description: |
+ *       **Stakeholder:** Guest User, Registered Customer
+ *       **Access Level:** Public (No Authentication Required)
+ *       
+ *       Creates a new order with the provided details such as items, customer information, and payment details. Validates stock availability and payment information before processing.
+ *       
+ *       **Error Handling:**
+ *       - Returns 400 if required fields are missing or invalid (email, card number, etc.).
+ *       - Returns 400 if products are no longer available.
+ *       - Returns 500 for internal server errors.
  *     tags:
  *       - Orders
  *     requestBody:

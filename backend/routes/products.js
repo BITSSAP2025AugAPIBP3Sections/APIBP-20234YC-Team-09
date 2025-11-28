@@ -378,16 +378,34 @@ const pineconeGroupRecommendations = async (products, limit = 10) => {
  * /api/products:
  *   get:
  *     summary: Returns the list of all products
+ *     description: |
+ *       **Stakeholder:** Guest User, Registered Customer
+ *       **Access Level:** Public (No Authentication Required)
+ *       
+ *       Retrieves a list of all available products in the catalog.
+ *       
+ *       **Error Handling:**
+ *       - Returns 500 if there is a server error fetching products.
  *     tags: [Products]
  *     responses:
  *       200:
- *         description: The list of products
+ *         description: The list of products retrieved successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Product'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Server error"
  */
 router.get('/', async (req, res) => {
   try {
@@ -409,6 +427,15 @@ router.get('/', async (req, res) => {
  * /api/products/{id}/similar:
  *   get:
  *     summary: Get recommended similar products for a given product ID
+ *     description: |
+ *       **Stakeholder:** Guest User, Registered Customer
+ *       **Access Level:** Public (No Authentication Required)
+ *       
+ *       Uses AI-powered vector search (Pinecone) to find products similar to the specified product. Falls back to heuristic matching if vector search fails.
+ *       
+ *       **Error Handling:**
+ *       - Returns 404 if the product ID is invalid or not found.
+ *       - Returns 500 for internal server errors.
  *     tags: [Products]
  *     parameters:
  *       - in: path
@@ -455,6 +482,15 @@ router.get('/:id/similar', async (req, res) => {
  * /api/products/recommendations:
  *   post:
  *     summary: Get recommendations based on multiple products
+ *     description: |
+ *       **Stakeholder:** System / Frontend Application
+ *       **Access Level:** Public (No Authentication Required)
+ *       
+ *       Generates recommendations based on a list of product IDs, useful for "Because you viewed..." sections.
+ *       
+ *       **Error Handling:**
+ *       - Returns 400 if the ids array is missing or empty.
+ *       - Returns 500 for internal server errors.
  *     tags: [Products]
  *     requestBody:
  *       required: true
@@ -466,7 +502,7 @@ router.get('/:id/similar', async (req, res) => {
  *               ids:
  *                 type: array
  *                 items:
- *                   type: string
+ *                     type: string
  *                 description: Array of MongoDB product _id strings
  *             example:
  *               ids: ["607d1f77bcf86cd799439011","607d1f77bcf86cd799439022"]
@@ -513,6 +549,15 @@ router.post('/recommendations', async (req, res) => {
  * /api/products/{id}:
  *   get:
  *     summary: Get a product by id
+ *     description: |
+ *       **Stakeholder:** Guest User, Registered Customer
+ *       **Access Level:** Public (No Authentication Required)
+ *       
+ *       Retrieves detailed information for a specific product.
+ *       
+ *       **Error Handling:**
+ *       - Returns 404 if the product is not found.
+ *       - Returns 500 for internal server errors.
  *     tags: [Products]
  *     parameters:
  *       - in: path
@@ -530,6 +575,8 @@ router.post('/recommendations', async (req, res) => {
  *               $ref: '#/components/schemas/Product'
  *       404:
  *         description: Product not found
+ *       500:
+ *         description: Server error
  */
 router.get('/:id', async (req, res) => {
   try {
@@ -548,6 +595,14 @@ router.get('/:id', async (req, res) => {
  * /api/products/category/{category}:
  *   get:
  *     summary: Get products by category
+ *     description: |
+ *       **Stakeholder:** Guest User, Registered Customer
+ *       **Access Level:** Public (No Authentication Required)
+ *       
+ *       Filters products by the specified category (e.g., Electronics, Computers).
+ *       
+ *       **Error Handling:**
+ *       - Returns 500 for internal server errors.
  *     tags: [Products]
  *     parameters:
  *       - in: path
@@ -565,6 +620,8 @@ router.get('/:id', async (req, res) => {
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Product'
+ *       500:
+ *         description: Server error
  */
 router.get('/category/:category', async (req, res) => {
   try {
@@ -580,6 +637,15 @@ router.get('/category/:category', async (req, res) => {
  * /api/products/{id}/rating:
  *   put:
  *     summary: Update the product rating
+ *     description: |
+ *       **Stakeholder:** Registered Customer
+ *       **Access Level:** Public (Currently unrestricted)
+ *       
+ *       Updates the product's average rating based on a new user review.
+ *       
+ *       **Error Handling:**
+ *       - Returns 404 if the product is not found.
+ *       - Returns 500 for internal server errors.
  *     tags: [Products]
  *     parameters:
  *       - in: path
@@ -607,6 +673,8 @@ router.get('/category/:category', async (req, res) => {
  *               $ref: '#/components/schemas/Product'
  *       404:
  *         description: Product not found
+ *       500:
+ *         description: Server error
  */
 router.put('/:id/rating', async (req, res) => {
   try {
