@@ -193,9 +193,9 @@ pipeline {
                         dir("${FRONTEND_DIR}") {
                             script {
                                 if (isUnix()) {
-                                    sh 'npm test -- --ci --coverage --watchAll=false'
+                                    sh 'npm test -- --ci --watchAll=false --maxWorkers=2'
                                 } else {
-                                    bat 'npm test -- --ci --coverage --watchAll=false'
+                                    bat 'npm test -- --ci --watchAll=false --maxWorkers=2'
                                 }
                             }
                         }
@@ -224,9 +224,9 @@ pipeline {
                         dir("${BACKEND_DIR}") {
                             script {
                                 if (isUnix()) {
-                                    sh 'npm test -- --ci --coverage'
+                                    sh 'SUPPRESS_JEST_WARNINGS=true npm test -- --ci --coverage'
                                 } else {
-                                    bat 'npm test -- --ci --coverage'
+                                    bat 'set SUPPRESS_JEST_WARNINGS=true && npm test -- --ci --coverage'
                                 }
                             }
                         }
