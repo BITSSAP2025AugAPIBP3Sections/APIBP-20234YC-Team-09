@@ -102,9 +102,9 @@ pipeline {
                         dir("${FRONTEND_DIR}") {
                             script {
                                 if (isUnix()) {
-                                    sh 'npm ci'
+                                    sh 'npm install'
                                 } else {
-                                    bat 'npm ci'
+                                    bat 'npm install'
                                 }
                             }
                         }
@@ -117,9 +117,9 @@ pipeline {
                         dir("${BACKEND_DIR}") {
                             script {
                                 if (isUnix()) {
-                                    sh 'npm ci'
+                                    sh 'npm install'
                                 } else {
-                                    bat 'npm ci'
+                                    bat 'npm install'
                                 }
                             }
                         }
