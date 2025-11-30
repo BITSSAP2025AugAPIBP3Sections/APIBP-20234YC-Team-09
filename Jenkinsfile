@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Node.js version
         NODEJS_HOME = tool name: 'NodeJS-18', type: 'nodejs'
-        PATH = "${NODEJS_HOME}/bin:${env.PATH}"
+        PATH = "${NODEJS_HOME};${env.PATH}"
         
         // Project directories
         BACKEND_DIR = 'backend'
@@ -54,10 +54,16 @@ pipeline {
                 checkout scm
                 
                 script {
-                    // Get commit information
-                    env.GIT_COMMIT_MSG = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
-                    env.GIT_AUTHOR = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
-                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    // Get commit information (Windows compatible)
+                    if (isUnix()) {
+                        env.GIT_COMMIT_MSG = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                        env.GIT_AUTHOR = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+                        env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    } else {
+                        env.GIT_COMMIT_MSG = bat(script: '@git log -1 --pretty=%%B', returnStdout: true).trim()
+                        env.GIT_AUTHOR = bat(script: '@git log -1 --pretty=%%an', returnStdout: true).trim()
+                        env.GIT_COMMIT_SHORT = bat(script: '@git rev-parse --short HEAD', returnStdout: true).trim()
+                    }
                 }
                 
                 echo "📝 Commit: ${env.GIT_COMMIT_SHORT}"
@@ -71,9 +77,14 @@ pipeline {
                 echo '🔧 Setting up build environment...'
                 
                 script {
-                    // Display Node.js and npm versions
-                    sh 'node --version'
-                    sh 'npm --version'
+                    // Display Node.js and npm versions (Windows/Unix compatible)
+                    if (isUnix()) {
+                        sh 'node --version'
+                        sh 'npm --version'
+                    } else {
+                        bat 'node --version'
+                        bat 'npm --version'
+                    }
                     
                     // Display build information
                     echo "🏗️  Build Number: ${env.BUILD_NUMBER}"
@@ -89,7 +100,13 @@ pipeline {
                     steps {
                         echo '📦 Installing frontend dependencies...'
                         dir("${FRONTEND_DIR}") {
-                            sh 'npm ci'
+                            script {
+                                if (isUnix()) {
+                                    sh 'npm ci'
+                                } else {
+                                    bat 'npm ci'
+                                }
+                            }
                         }
                     }
                 }
@@ -98,7 +115,13 @@ pipeline {
                     steps {
                         echo '📦 Installing backend dependencies...'
                         dir("${BACKEND_DIR}") {
-                            sh 'npm ci'
+                            script {
+                                if (isUnix()) {
+                                    sh 'npm ci'
+                                } else {
+                                    bat 'npm ci'
+                                }
+                            }
                         }
                     }
                 }
@@ -111,7 +134,13 @@ pipeline {
                     steps {
                         echo '🔍 Running frontend linting...'
                         dir("${FRONTEND_DIR}") {
-                            sh 'npm run lint || true'
+                            script {
+                                if (isUnix()) {
+                                    sh 'npm run lint || true'
+                                } else {
+                                    bat 'npm run lint || exit 0'
+                                }
+                            }
                         }
                     }
                 }
@@ -120,7 +149,13 @@ pipeline {
                     steps {
                         echo '🔍 Running backend linting...'
                         dir("${BACKEND_DIR}") {
-                            sh 'npm run lint || true'
+                            script {
+                                if (isUnix()) {
+                                    sh 'npm run lint || true'
+                                } else {
+                                    bat 'npm run lint || exit 0'
+                                }
+                            }
                         }
                     }
                 }
@@ -129,11 +164,20 @@ pipeline {
                     steps {
                         echo '🔒 Running security audit...'
                         script {
-                            dir("${FRONTEND_DIR}") {
-                                sh 'npm audit --audit-level=moderate || true'
-                            }
-                            dir("${BACKEND_DIR}") {
-                                sh 'npm audit --audit-level=moderate || true'
+                            if (isUnix()) {
+                                dir("${FRONTEND_DIR}") {
+                                    sh 'npm audit --audit-level=moderate || true'
+                                }
+                                dir("${BACKEND_DIR}") {
+                                    sh 'npm audit --audit-level=moderate || true'
+                                }
+                            } else {
+                                dir("${FRONTEND_DIR}") {
+                                    bat 'npm audit --audit-level=moderate || exit 0'
+                                }
+                                dir("${BACKEND_DIR}") {
+                                    bat 'npm audit --audit-level=moderate || exit 0'
+                                }
                             }
                         }
                     }
@@ -147,7 +191,13 @@ pipeline {
                     steps {
                         echo '🧪 Running frontend unit tests...'
                         dir("${FRONTEND_DIR}") {
-                            sh 'npm test -- --ci --coverage --watchAll=false'
+                            script {
+                                if (isUnix()) {
+                                    sh 'npm test -- --ci --coverage --watchAll=false'
+                                } else {
+                                    bat 'npm test -- --ci --coverage --watchAll=false'
+                                }
+                            }
                         }
                     }
                     post {
@@ -172,7 +222,13 @@ pipeline {
                     steps {
                         echo '🧪 Running backend unit tests...'
                         dir("${BACKEND_DIR}") {
-                            sh 'npm test -- --ci --coverage'
+                            script {
+                                if (isUnix()) {
+                                    sh 'npm test -- --ci --coverage'
+                                } else {
+                                    bat 'npm test -- --ci --coverage'
+                                }
+                            }
                         }
                     }
                     post {
@@ -202,18 +258,15 @@ pipeline {
             steps {
                 echo '📊 Running SonarQube analysis...'
                 script {
-                    def scannerHome = tool 'SonarQubeScanner'
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                            -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
-                            -Dsonar.projectVersion=${env.BUILD_NUMBER} \
-                            -Dsonar.sources=src,backend \
-                            -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/coverage/** \
-                            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info,backend/coverage/lcov.info
-                        """
-                    }
+                    echo 'SonarQube not configured, skipping...'
+                    // def scannerHome = tool 'SonarQubeScanner'
+                    // withSonarQubeEnv('SonarQube') {
+                    //     if (isUnix()) {
+                    //         sh "${scannerHome}/bin/sonar-scanner ..."
+                    //     } else {
+                    //         bat "${scannerHome}\\bin\\sonar-scanner.bat ..."
+                    //     }
+                    // }
                 }
             }
         }
@@ -224,7 +277,13 @@ pipeline {
                     steps {
                         echo '🏗️  Building frontend application...'
                         dir("${FRONTEND_DIR}") {
-                            sh 'npm run build'
+                            script {
+                                if (isUnix()) {
+                                    sh 'npm run build'
+                                } else {
+                                    bat 'npm run build'
+                                }
+                            }
                         }
                     }
                     post {
@@ -239,7 +298,13 @@ pipeline {
                     steps {
                         echo '🏗️  Preparing backend for deployment...'
                         dir("${BACKEND_DIR}") {
-                            sh 'echo "Backend prepared for deployment"'
+                            script {
+                                if (isUnix()) {
+                                    sh 'echo "Backend prepared for deployment"'
+                                } else {
+                                    bat 'echo Backend prepared for deployment'
+                                }
+                            }
                         }
                     }
                 }
@@ -253,19 +318,15 @@ pipeline {
             steps {
                 echo '🐳 Building Docker images...'
                 script {
-                    // Build frontend Docker image
-                    sh """
-                        docker build -t ${DOCKER_IMAGE_FRONTEND}:${DOCKER_TAG} \
-                        -t ${DOCKER_IMAGE_FRONTEND}:latest \
-                        -f Dockerfile .
-                    """
-                    
-                    // Build backend Docker image
-                    sh """
-                        docker build -t ${DOCKER_IMAGE_BACKEND}:${DOCKER_TAG} \
-                        -t ${DOCKER_IMAGE_BACKEND}:latest \
-                        -f backend/Dockerfile ./backend
-                    """
+                    echo 'Docker not configured, skipping Docker build...'
+                    // Uncomment when Docker is available
+                    // if (isUnix()) {
+                    //     sh "docker build -t ${DOCKER_IMAGE_FRONTEND}:${DOCKER_TAG} -t ${DOCKER_IMAGE_FRONTEND}:latest -f Dockerfile ."
+                    //     sh "docker build -t ${DOCKER_IMAGE_BACKEND}:${DOCKER_TAG} -t ${DOCKER_IMAGE_BACKEND}:latest -f backend/Dockerfile ./backend"
+                    // } else {
+                    //     bat "docker build -t ${DOCKER_IMAGE_FRONTEND}:${DOCKER_TAG} -t ${DOCKER_IMAGE_FRONTEND}:latest -f Dockerfile ."
+                    //     bat "docker build -t ${DOCKER_IMAGE_BACKEND}:${DOCKER_TAG} -t ${DOCKER_IMAGE_BACKEND}:latest -f backend/Dockerfile ./backend"
+                    // }
                 }
             }
         }
@@ -273,8 +334,13 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 echo '🔗 Running integration tests...'
-                sh 'echo "Integration tests would run here"'
-                // Add your integration tests here
+                script {
+                    if (isUnix()) {
+                        sh 'echo "Integration tests would run here"'
+                    } else {
+                        bat 'echo Integration tests would run here'
+                    }
+                }
             }
         }
         
@@ -286,7 +352,11 @@ pipeline {
                 echo '⚡ Running performance tests...'
                 script {
                     // Run load tests with Artillery
-                    sh 'npx artillery quick --count 10 --num 3 http://localhost:5000/api/products || true'
+                    if (isUnix()) {
+                        sh 'npx artillery quick --count 10 --num 3 http://localhost:5000/api/products || true'
+                    } else {
+                        bat 'npx artillery quick --count 10 --num 3 http://localhost:5000/api/products || exit 0'
+                    }
                 }
             }
         }
@@ -298,18 +368,15 @@ pipeline {
             steps {
                 echo '🚀 Deploying to staging environment...'
                 script {
-                    // Deploy using Kubernetes
-                    sh """
-                        kubectl apply -f kubernetes/configmap.yaml
-                        kubectl apply -f kubernetes/backend-deployment.yaml
-                        kubectl apply -f kubernetes/backend-service.yaml
-                        kubectl apply -f kubernetes/frontend-deployment.yaml
-                        kubectl apply -f kubernetes/frontend-service.yaml
-                    """
-                    
-                    // Wait for deployment to complete
-                    sh 'kubectl rollout status deployment/fusion-backend -n fusion-ecommerce || true'
-                    sh 'kubectl rollout status deployment/fusion-frontend -n fusion-ecommerce || true'
+                    echo 'Kubernetes not configured, skipping deployment...'
+                    // Uncomment when Kubernetes is configured
+                    // if (isUnix()) {
+                    //     sh 'kubectl apply -f kubernetes/'
+                    //     sh 'kubectl rollout status deployment/fusion-backend -n fusion-ecommerce || true'
+                    // } else {
+                    //     bat 'kubectl apply -f kubernetes\\'
+                    //     bat 'kubectl rollout status deployment/fusion-backend -n fusion-ecommerce || exit 0'
+                    // }
                 }
             }
         }
@@ -321,8 +388,13 @@ pipeline {
             steps {
                 echo '💨 Running smoke tests on staging...'
                 script {
-                    // Health check
-                    sh 'curl -f http://staging.fusion-electronics.com/api/health || true'
+                    echo 'Smoke tests skipped (staging not configured)'
+                    // Uncomment when staging is available
+                    // if (isUnix()) {
+                    //     sh 'curl -f http://staging.fusion-electronics.com/api/health || true'
+                    // } else {
+                    //     bat 'curl -f http://staging.fusion-electronics.com/api/health || exit 0'
+                    // }
                 }
             }
         }
