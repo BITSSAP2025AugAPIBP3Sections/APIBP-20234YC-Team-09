@@ -1,0 +1,128 @@
+{
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.Get All Products": 238,
+      "vusers.created": 600,
+      "http.requests": 600,
+      "plugins.metrics-by-endpoint./api/products.errors.ECONNREFUSED": 238,
+      "errors.ECONNREFUSED": 600,
+      "vusers.failed": 600,
+      "vusers.created_by_name.Newsletter Subscription": 177,
+      "plugins.metrics-by-endpoint./api/newsletter/subscribe.errors.ECONNREFUSED": 177,
+      "vusers.created_by_name.Search Products": 185,
+      "plugins.metrics-by-endpoint./api/search.errors.ECONNREFUSED": 185
+    },
+    "rates": {
+      "http.request_rate": 20
+    },
+    "firstCounterAt": 1764410786584,
+    "lastCounterAt": 1764410816628,
+    "firstMetricAt": 1764410786584,
+    "lastMetricAt": 1764410816628,
+    "period": 1764410810000,
+    "summaries": {},
+    "histograms": {}
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.Get All Products": 31,
+        "vusers.created": 68,
+        "http.requests": 68,
+        "plugins.metrics-by-endpoint./api/products.errors.ECONNREFUSED": 31,
+        "errors.ECONNREFUSED": 68,
+        "vusers.failed": 68,
+        "vusers.created_by_name.Newsletter Subscription": 17,
+        "plugins.metrics-by-endpoint./api/newsletter/subscribe.errors.ECONNREFUSED": 17,
+        "vusers.created_by_name.Search Products": 20,
+        "plugins.metrics-by-endpoint./api/search.errors.ECONNREFUSED": 20
+      },
+      "rates": {
+        "http.request_rate": 20
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1764410786584,
+      "lastCounterAt": 1764410789983,
+      "firstMetricAt": 1764410786584,
+      "lastMetricAt": 1764410789983,
+      "period": "1764410780000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Newsletter Subscription": 67,
+        "vusers.created": 200,
+        "http.requests": 200,
+        "plugins.metrics-by-endpoint./api/newsletter/subscribe.errors.ECONNREFUSED": 67,
+        "errors.ECONNREFUSED": 200,
+        "vusers.failed": 200,
+        "vusers.created_by_name.Get All Products": 84,
+        "plugins.metrics-by-endpoint./api/products.errors.ECONNREFUSED": 84,
+        "vusers.created_by_name.Search Products": 49,
+        "plugins.metrics-by-endpoint./api/search.errors.ECONNREFUSED": 49
+      },
+      "rates": {
+        "http.request_rate": 20
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1764410790044,
+      "lastCounterAt": 1764410799984,
+      "firstMetricAt": 1764410790044,
+      "lastMetricAt": 1764410799984,
+      "period": "1764410790000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Search Products": 73,
+        "vusers.created": 200,
+        "http.requests": 200,
+        "plugins.metrics-by-endpoint./api/search.errors.ECONNREFUSED": 73,
+        "errors.ECONNREFUSED": 200,
+        "vusers.failed": 200,
+        "vusers.created_by_name.Get All Products": 79,
+        "plugins.metrics-by-endpoint./api/products.errors.ECONNREFUSED": 79,
+        "vusers.created_by_name.Newsletter Subscription": 48,
+        "plugins.metrics-by-endpoint./api/newsletter/subscribe.errors.ECONNREFUSED": 48
+      },
+      "rates": {
+        "http.request_rate": 20
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1764410800044,
+      "lastCounterAt": 1764410809982,
+      "firstMetricAt": 1764410800044,
+      "lastMetricAt": 1764410809982,
+      "period": "1764410800000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Newsletter Subscription": 45,
+        "vusers.created": 132,
+        "http.requests": 132,
+        "plugins.metrics-by-endpoint./api/newsletter/subscribe.errors.ECONNREFUSED": 45,
+        "errors.ECONNREFUSED": 132,
+        "vusers.failed": 132,
+        "vusers.created_by_name.Search Products": 43,
+        "plugins.metrics-by-endpoint./api/search.errors.ECONNREFUSED": 43,
+        "vusers.created_by_name.Get All Products": 44,
+        "plugins.metrics-by-endpoint./api/products.errors.ECONNREFUSED": 44
+      },
+      "rates": {
+        "http.request_rate": 20
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1764410810044,
+      "lastCounterAt": 1764410816628,
+      "firstMetricAt": 1764410810044,
+      "lastMetricAt": 1764410816628,
+      "period": "1764410810000",
+      "summaries": {},
+      "histograms": {}
+    }
+  ]
+}

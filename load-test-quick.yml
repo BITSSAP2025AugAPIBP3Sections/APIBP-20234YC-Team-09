@@ -1,0 +1,27 @@
+config:
+  target: "http://localhost:8000"
+  phases:
+    - duration: 30
+      arrivalRate: 20
+      name: "Load test - 20 requests/sec"
+  
+scenarios:
+  - name: "Get All Products"
+    weight: 40
+    flow:
+      - get:
+          url: "/api/products"
+          
+  - name: "Search Products"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/search?q=laptop"
+          
+  - name: "Newsletter Subscription"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/newsletter/subscribe"
+          json:
+            email: "loadtest{{ $randomNumber(1, 10000) }}@example.com"
