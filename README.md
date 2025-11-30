@@ -1,6 +1,6 @@
-# APIBP-20234YC-Team-22 - Fusion Electronics
+# APIBP-20234YC-Team-09 - Fusion Electronics
 
-2023 4Y-C MERN Stack Fusion Electronics Application - Team 22
+2023 4Y-C MERN Stack Fusion Electronics Application - Team 09
 
 # Fusion Electronics: A MERN-Stack E-commerce Application
 
