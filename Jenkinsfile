@@ -94,6 +94,20 @@ pipeline {
             }
         }
         
+        stage('Clean Workspace') {
+            steps {
+                echo '🧹 Cleaning workspace...'
+                script {
+                    if (isUnix()) {
+                        sh 'rm -rf node_modules backend/node_modules || true'
+                    } else {
+                        bat 'if exist node_modules rmdir /s /q node_modules || exit 0'
+                        bat 'if exist backend\\node_modules rmdir /s /q backend\\node_modules || exit 0'
+                    }
+                }
+            }
+        }
+        
         stage('Install Dependencies') {
             parallel {
                 stage('Frontend Dependencies') {
@@ -102,9 +116,9 @@ pipeline {
                         dir("${FRONTEND_DIR}") {
                             script {
                                 if (isUnix()) {
-                                    sh 'npm install'
+                                    sh 'npm install --prefer-offline --no-audit'
                                 } else {
-                                    bat 'npm install'
+                                    bat 'npm install --prefer-offline --no-audit'
                                 }
                             }
                         }
@@ -117,9 +131,9 @@ pipeline {
                         dir("${BACKEND_DIR}") {
                             script {
                                 if (isUnix()) {
-                                    sh 'npm install'
+                                    sh 'npm install --prefer-offline --no-audit'
                                 } else {
-                                    bat 'npm install'
+                                    bat 'npm install --prefer-offline --no-audit'
                                 }
                             }
                         }
