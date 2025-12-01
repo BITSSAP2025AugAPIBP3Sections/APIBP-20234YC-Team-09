@@ -97,6 +97,43 @@ pipeline {
             }
         }
         
+        stage('SonarQube Analysis') {
+            when {
+                expression { return fileExists('sonar-project.properties') }
+            }
+            steps {
+                echo '🔍 Running SonarQube code analysis...'
+                script {
+                    if (isUnix()) {
+                        sh '''
+                            docker run --rm \
+                                -v ${WORKSPACE}:/usr/src \
+                                -e SONAR_HOST_URL=http://host.docker.internal:9000 \
+                                -e SONAR_LOGIN=admin \
+                                -e SONAR_PASSWORD=admin \
+                                sonarsource/sonar-scanner-cli:latest \
+                                -Dsonar.projectKey=fusion-electronics-ecommerce \
+                                -Dsonar.sources=. \
+                                -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**
+                        '''
+                    } else {
+                        bat '''
+                            docker run --rm ^
+                                -v "%WORKSPACE%":/usr/src ^
+                                -e SONAR_HOST_URL=http://host.docker.internal:9000 ^
+                                -e SONAR_LOGIN=admin ^
+                                -e SONAR_PASSWORD=admin ^
+                                sonarsource/sonar-scanner-cli:latest ^
+                                -Dsonar.projectKey=fusion-electronics-ecommerce ^
+                                -Dsonar.sources=. ^
+                                -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**
+                        '''
+                    }
+                }
+                echo '✅ SonarQube analysis completed!'
+            }
+        }
+        
         stage('Build') {
             steps {
                 echo '🏗️  Build stage completed (tests passed)...'
