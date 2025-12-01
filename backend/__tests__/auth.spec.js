@@ -35,12 +35,12 @@ describe('Auth API', () => {
   });
 
   describe('POST /api/auth/register', () => {
-    it('200 → new user', async () => {
+    it('201 → new user', async () => {
       User.findOne.mockResolvedValue(null);
       const res = await request(app)
         .post('/api/auth/register')
         .send({ name: 'Alice', email: 'alice@example.com', password: 'secret123' });
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(201);
       expect(res.body).toEqual({ token: 'jwt-token' });
       // ensure password was hashed & user.save called
       expect(bcrypt.hash).toHaveBeenCalledWith('secret123', 'salt');
@@ -55,12 +55,12 @@ describe('Auth API', () => {
       expect(res.body.errors).toBeInstanceOf(Array);
     });
 
-    it('400 → user exists', async () => {
+    it('409 → user exists', async () => {
       User.findOne.mockResolvedValue({ id: 'x', email: 'a@b.com' });
       const res = await request(app)
         .post('/api/auth/register')
         .send({ name: 'Bob', email: 'a@b.com', password: 'abcdef' });
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(409);
       expect(res.body).toEqual({ msg: 'User already exists' });
     });
   });
