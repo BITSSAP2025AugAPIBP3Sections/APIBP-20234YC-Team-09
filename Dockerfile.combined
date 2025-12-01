@@ -1,0 +1,27 @@
+# Combined Frontend + Backend Docker Image for Fusion Electronics
+# Now runs on a single port (8000) - backend serves the frontend
+FROM node:18-alpine
+
+LABEL org.opencontainers.image.description="Fusion Electronics - Complete MERN Stack Application (Unified Port 8000)"
+
+WORKDIR /app
+
+# Copy all project files
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+
+# Install all dependencies (frontend + backend)
+RUN npm install --legacy-peer-deps && \
+    cd backend && npm install --legacy-peer-deps
+
+# Copy source code
+COPY . .
+
+# Build frontend
+RUN npm run build
+
+# Expose single port for both frontend and API
+EXPOSE 8000
+
+# Start unified server (backend serves frontend on port 8000)
+CMD ["node", "start-unified.js"]

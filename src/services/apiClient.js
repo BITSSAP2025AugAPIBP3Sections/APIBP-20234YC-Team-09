@@ -6,11 +6,9 @@ const resolveBaseURL = () => {
     return envUrl.replace(/\/$/, '');
   }
 
-  if (process.env.REACT_APP_API_USE_PROXY === 'true') {
-    return '/api';
-  }
-
-  return 'https://fusion-electronics-api.vercel.app/api';
+  // In production, frontend and backend are on same port
+  // So we use relative URLs (/api)
+  return '/api';
 };
 
 export const API_BASE_URL = resolveBaseURL();

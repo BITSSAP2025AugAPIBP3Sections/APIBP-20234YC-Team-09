@@ -99,9 +99,14 @@ const swaggerDefinition = {
 };
 
 // Options for the swagger docs
+const path = require('path');
 const options = {
   swaggerDefinition,
-  apis: ['./routes/*.js'],
+  // Use absolute paths to find route files regardless of where server is started from
+  apis: [
+    path.join(__dirname, '../routes/*.js'),
+    path.join(__dirname, '../routes/**/*.js'),
+  ],
 };
 
 // Initialize swagger-jsdoc

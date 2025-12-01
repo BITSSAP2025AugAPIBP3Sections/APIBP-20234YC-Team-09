@@ -66,21 +66,42 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Redirect root to /api-docs
-app.get('/', (req, res) => {
-  res.redirect('/api-docs');
-});
-
 // Setup Swagger UI with customized title
 setupSwaggerJson(app); // serves /api-docs/swagger.json
 setupSwaggerUi(app);
 
-// Routes
+// API Routes
 app.use('/api/products', productRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/search', require('./routes/search'));
 app.use('/api/auth', authRoutes);
 app.use('/api/newsletter', newsletterRoutes);
+
+// Serve static frontend files (React build)
+const path = require('path');
+const frontendBuildPath = path.join(__dirname, '..', 'build');
+
+// Check if build folder exists
+const fs = require('fs');
+if (fs.existsSync(frontendBuildPath)) {
+  app.use(express.static(frontendBuildPath));
+  
+  // All non-API routes should serve the React app
+  app.get('*', (req, res) => {
+    // Exclude API and docs routes
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/api-docs')) {
+      res.sendFile(path.join(frontendBuildPath, 'index.html'));
+    }
+  });
+  
+  console.log('🚀 Serving frontend from:', frontendBuildPath);
+} else {
+  // Fallback: redirect root to API docs if no frontend build exists
+  app.get('/', (req, res) => {
+    res.redirect('/api-docs');
+  });
+  console.log('⚠️  Frontend build not found. Serving API only.');
+}
 
 module.exports = app;
