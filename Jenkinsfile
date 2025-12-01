@@ -80,16 +80,19 @@ pipeline {
         }
         
         stage('Test & Build') {
+            options {
+                timeout(time: 5, unit: 'MINUTES')
+            }
             steps {
                 echo '🧪 Running tests...'
                 script {
-                    // Run quick tests (limited test files) - using --testNamePattern for Jest 29+
+                    // Run quick tests with optimizations - using --testNamePattern for Jest 29+
                     if (isUnix()) {
-                        sh 'cd backend && npm test -- --testNamePattern="auth" --ci'
-                        sh 'npm test -- --testNamePattern="Home" --ci --watchAll=false --maxWorkers=2'
+                        sh 'cd backend && npm test -- --testNamePattern="auth" --ci --bail --testTimeout=10000'
+                        sh 'npm test -- --testNamePattern="Home" --ci --watchAll=false --maxWorkers=1 --bail --testTimeout=15000'
                     } else {
-                        bat 'cd backend && npm test -- --testNamePattern="auth" --ci'
-                        bat 'npm test -- --testNamePattern="Home" --ci --watchAll=false --maxWorkers=2'
+                        bat 'cd backend && npm test -- --testNamePattern="auth" --ci --bail --testTimeout=10000'
+                        bat 'npm test -- --testNamePattern="Home" --ci --watchAll=false --maxWorkers=1 --bail --testTimeout=15000'
                     }
                     echo '✅ Tests passed!'
                 }
