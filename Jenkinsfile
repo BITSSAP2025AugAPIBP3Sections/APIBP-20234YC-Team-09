@@ -83,13 +83,13 @@ pipeline {
             steps {
                 echo '🧪 Running tests...'
                 script {
-                    // Run quick tests (limited test files)
+                    // Run quick tests (limited test files) - using --testNamePattern for Jest 29+
                     if (isUnix()) {
-                        sh 'cd backend && npm test -- --testPathPattern="auth.spec.js" --ci'
-                        sh 'npm test -- --testPathPattern="Home.test.js" --ci --watchAll=false --maxWorkers=2'
+                        sh 'cd backend && npm test -- --testNamePattern="auth" --ci'
+                        sh 'npm test -- --testNamePattern="Home" --ci --watchAll=false --maxWorkers=2'
                     } else {
-                        bat 'cd backend && npm test -- --testPathPattern="auth.spec.js" --ci'
-                        bat 'npm test -- --testPathPattern="Home.test.js" --ci --watchAll=false --maxWorkers=2'
+                        bat 'cd backend && npm test -- --testNamePattern="auth" --ci'
+                        bat 'npm test -- --testNamePattern="Home" --ci --watchAll=false --maxWorkers=2'
                     }
                     echo '✅ Tests passed!'
                 }
