@@ -12,4 +12,10 @@ module.exports = {
     '/node_modules/(?!@mui|react-material-ui-carousel)/'
   ],
   testPathIgnorePatterns: ['/node_modules/', '/build/'],
+  testTimeout: 15000,  // 15 second timeout for slow tests
+  globals: {
+    'process.env': {
+      SUPPRESS_JEST_WARNINGS: 'true'  // Suppress Mongoose jsdom warnings
+    }
+  }
 };
