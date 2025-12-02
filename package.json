@@ -59,7 +59,12 @@
     "backend": "cd backend && npm start",
     "dev": "concurrently \"npm run server\" \"npm run frontend\"",
     "format": "prettier --config .prettierrc --write \"setupProxy.js\" \"src/components/*.{html,css,js,jsx,ts,tsx}\" \"src/tests/*.{html,css,js,jsx,ts,tsx}\" \"src/dev/*.{html,css,js,jsx,ts,tsx}\" \"src/pages/*.{html,css,js,jsx,ts,tsx}\" \"src/*.{html,css,js,jsx,ts,tsx}\" \"backend/*.{html,css,js,jsx,ts,tsx}\" \"backend/seed/*.{html,css,js,jsx,ts,tsx}\" \"backend/routes/*.{html,css,js,jsx,ts,tsx}\" \"backend/docs/*.{html,css,js,jsx,ts,tsx}\" \"backend/config/*.{html,css,js,jsx,ts,tsx}\"",
-    "lint": "prettier --config .prettierrc --write \"setupProxy.js\" \"src/components/*.{html,css,js,jsx,ts,tsx}\" \"src/tests/*.{html,css,js,jsx,ts,tsx}\" \"src/dev/*.{html,css,js,jsx,ts,tsx}\" \"src/pages/*.{html,css,js,jsx,ts,tsx}\" \"src/*.{html,css,js,jsx,ts,tsx}\" \"backend/*.{html,css,js,jsx,ts,tsx}\" \"backend/seed/*.{html,css,js,jsx,ts,tsx}\" \"backend/routes/*.{html,css,js,jsx,ts,tsx}\" \"backend/docs/*.{html,css,js,jsx,ts,tsx}\" \"backend/config/*.{html,css,js,jsx,ts,tsx}\""
+    "lint": "prettier --config .prettierrc --write \"setupProxy.js\" \"src/components/*.{html,css,js,jsx,ts,tsx}\" \"src/tests/*.{html,css,js,jsx,ts,tsx}\" \"src/dev/*.{html,css,js,jsx,ts,tsx}\" \"src/pages/*.{html,css,js,jsx,ts,tsx}\" \"src/*.{html,css,js,jsx,ts,tsx}\" \"backend/*.{html,css,js,jsx,ts,tsx}\" \"backend/seed/*.{html,css,js,jsx,ts,tsx}\" \"backend/routes/*.{html,css,js,jsx,ts,tsx}\" \"backend/docs/*.{html,css,js,jsx,ts,tsx}\" \"backend/config/*.{html,css,js,jsx,ts,tsx}\"",
+    "selenium": "node selenium-tests/runAllTests.js",
+    "selenium:home": "node selenium-tests/tests/HomePageTest.js",
+    "selenium:shop": "node selenium-tests/tests/ShopPageTest.js",
+    "selenium:register": "node selenium-tests/tests/UserRegistrationTest.js",
+    "selenium:cart": "node selenium-tests/tests/AddToCartTest.js"
   },
   "workspaces": [
     "backend"
@@ -88,10 +93,12 @@
     "@babel/preset-react": "^7.27.1",
     "@craco/craco": "^7.1.0",
     "babel-jest": "^30.0.4",
+    "chromedriver": "^142.0.3",
     "css-loader": "^7.1.2",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^27.5.1",
     "jest-circus": "^30.0.4",
+    "selenium-webdriver": "^4.38.0",
     "style-loader": "^4.0.0",
     "supertest": "^7.1.1"
   }
