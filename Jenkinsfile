@@ -258,10 +258,9 @@ pipeline {
                     try {
                         if (isUnix()) {
                             sh '''
-                                # Fix workspace path with spaces by using proper quoting
-                                WORKSPACE_QUOTED="$(printf '%q' "${WORKSPACE}")"
+                                # Fix workspace path with spaces using proper shell quoting
                                 docker run --rm \\
-                                    -v "${WORKSPACE_QUOTED}":/usr/src \\
+                                    -v "$(pwd)":/usr/src \\
                                     -e SONAR_HOST_URL=http://34.132.244.48:9000 \\
                                     -e SONAR_LOGIN=admin \\
                                     -e SONAR_PASSWORD=Shaurya@7081 \\
