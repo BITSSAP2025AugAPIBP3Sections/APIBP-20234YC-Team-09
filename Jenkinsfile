@@ -258,16 +258,17 @@ pipeline {
                     try {
                         if (isUnix()) {
                             sh '''
-                                # Fix workspace path with spaces by using quotes
+                                # Fix workspace path with spaces by using proper quoting
+                                WORKSPACE_QUOTED="$(printf '%q' "${WORKSPACE}")"
                                 docker run --rm \\
-                                    -v "${WORKSPACE}":/usr/src \\
-                                    -e SONAR_HOST_URL=http://10.0.0.5:9000 \\
+                                    -v "${WORKSPACE_QUOTED}":/usr/src \\
+                                    -e SONAR_HOST_URL=http://34.132.244.48:9000 \\
                                     -e SONAR_LOGIN=admin \\
                                     -e SONAR_PASSWORD=Shaurya@7081 \\
                                     --network="host" \\
                                     sonarsource/sonar-scanner-cli:latest \\
-                                    -Dsonar.projectKey=fusion-electronics-ecommerce \\
-                                    -Dsonar.projectName="Fusion Electronics E-commerce" \\
+                                    -Dsonar.projectKey=fusion-electronics \\
+                                    -Dsonar.projectName="Fusion Electronics" \\
                                     -Dsonar.sources=. \\
                                     -Dsonar.exclusions=**/node_modules/**,**/build/**,**/dist/**,**/coverage/**,**/selenium-tests/screenshots/**
                             '''
