@@ -296,9 +296,190 @@ pipeline {
             }
         }
         
-        stage('Build') {
+        stage('Docker Build & Push') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'master'
+                    branch 'develop'
+                    branch 'Suryansh_modification'
+                }
+            }
             steps {
-                echo '🏗️  Final build stage...'
+                echo '🐳 Building and pushing Docker image...'
+                script {
+                    try {
+                        if (isUnix()) {
+                            sh '''
+                                # Build Docker image with build number tag
+                                docker build -t suryanshpandey7081/fusion-electronics:${BUILD_NUMBER} .
+                                docker tag suryanshpandey7081/fusion-electronics:${BUILD_NUMBER} suryanshpandey7081/fusion-electronics:latest
+                                
+                                # Push to Docker Hub
+                                docker push suryanshpandey7081/fusion-electronics:${BUILD_NUMBER}
+                                docker push suryanshpandey7081/fusion-electronics:latest
+                            '''
+                        } else {
+                            bat '''
+                                REM Build Docker image with build number tag
+                                docker build -t suryanshpandey7081/fusion-electronics:%BUILD_NUMBER% .
+                                docker tag suryanshpandey7081/fusion-electronics:%BUILD_NUMBER% suryanshpandey7081/fusion-electronics:latest
+                                
+                                REM Push to Docker Hub
+                                docker push suryanshpandey7081/fusion-electronics:%BUILD_NUMBER%
+                                docker push suryanshpandey7081/fusion-electronics:latest
+                            '''
+                        }
+                        echo '✅ Docker build and push completed!'
+                    } catch (Exception e) {
+                        echo "⚠️ Docker build failed: ${e.getMessage()}"
+                        echo 'Continuing pipeline...'
+                    }
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                echo '🏥 Running comprehensive health checks...'
+                script {
+                    try {
+                        // Install dependencies for health check
+                        if (isUnix()) {
+                            sh '''
+                                npm install axios --no-audit
+                                node health-check.js
+                            '''
+                        } else {
+                            bat '''
+                                npm install axios --no-audit
+                                node health-check.js
+                            '''
+                        }
+                        echo '✅ Health checks passed!'
+                    } catch (Exception e) {
+                        echo "⚠️ Health check failed: ${e.getMessage()}"
+                        echo 'Continuing pipeline...'
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Production') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'master'
+                    branch 'Suryansh_modification'
+                }
+            }
+            steps {
+                echo '🚀 Deploying to production with health checks...'
+                script {
+                    try {
+                        if (isUnix()) {
+                            sh '''
+                                # Make deployment script executable
+                                chmod +x deploy.sh
+                                
+                                # Run deployment script
+                                ./deploy.sh deploy
+                            '''
+                        } else {
+                            bat '''
+                                REM Run deployment with PowerShell equivalent
+                                docker run --rm -d --name fusion-production ^
+                                    -p 8001:8000 ^
+                                    -p 3001:3000 ^
+                                    --health-cmd="curl -f http://localhost:8000/api/products || exit 1" ^
+                                    --health-interval=30s ^
+                                    --health-timeout=10s ^
+                                    --health-retries=3 ^
+                                    suryanshpandey7081/fusion-electronics:latest
+                                
+                                REM Wait and check health
+                                timeout /t 30 /nobreak
+                                curl -f http://localhost:8001/api/products
+                            '''
+                        }
+                        echo '✅ Deployment completed successfully!'
+                    } catch (Exception e) {
+                        echo "❌ Deployment failed: ${e.getMessage()}"
+                        echo '🔄 Attempting rollback...'
+                        
+                        // Attempt rollback
+                        if (isUnix()) {
+                            sh './deploy.sh rollback || echo "Rollback failed"'
+                        } else {
+                            bat '''
+                                docker stop fusion-production 2>nul || echo "No container to stop"
+                                docker rm fusion-production 2>nul || echo "No container to remove"
+                            '''
+                        }
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('Post-Deployment Verification') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'master'
+                    branch 'Suryansh_modification'
+                }
+            }
+            steps {
+                echo '🔍 Verifying deployment...'
+                script {
+                    try {
+                        // Wait for service to be ready
+                        sleep(15)
+                        
+                        // Run final health check
+                        if (isUnix()) {
+                            sh '''
+                                # Test deployment health
+                                curl -f http://localhost:8001/api/products
+                                
+                                # Send deployment notification to ELK
+                                curl -X POST "http://34.132.244.48:9200/deployments/_doc" \
+                                    -H "Content-Type: application/json" \
+                                    -d "{
+                                        \\"timestamp\\": \\"$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)\\",
+                                        \\"project\\": \\"fusion-electronics\\",
+                                        \\"build\\": \\"${BUILD_NUMBER}\\",
+                                        \\"status\\": \\"success\\",
+                                        \\"branch\\": \\"${GIT_BRANCH}\\",
+                                        \\"commit\\": \\"${GIT_COMMIT}\\",
+                                        \\"jenkins_url\\": \\"${BUILD_URL}\\"
+                                    }" || echo "ELK notification failed"
+                            '''
+                        } else {
+                            bat '''
+                                REM Test deployment health
+                                curl -f http://localhost:8001/api/products
+                                
+                                REM Send deployment notification to ELK
+                                curl -X POST "http://34.132.244.48:9200/deployments/_doc" ^
+                                    -H "Content-Type: application/json" ^
+                                    -d "{\\"timestamp\\": \\"%date:~10,4%-%date:~4,2%-%date:~7,2%T%time:~0,2%:%time:~3,2%:%time:~6,2%.000Z\\", \\"project\\": \\"fusion-electronics\\", \\"build\\": \\"%BUILD_NUMBER%\\", \\"status\\": \\"success\\", \\"branch\\": \\"%GIT_BRANCH%\\", \\"jenkins_url\\": \\"%BUILD_URL%\\"}" || echo "ELK notification failed"
+                            '''
+                        }
+                        
+                        echo '✅ Post-deployment verification completed!'
+                    } catch (Exception e) {
+                        echo "❌ Post-deployment verification failed: ${e.getMessage()}"
+                        throw e
+                    }
+                }
+            }
+        }
+
+        stage('Cleanup & Final Build') {
+            steps {
+                echo '🧹 Cleaning up and finalizing...'
                 script {
                     // Stop application services
                     if (isUnix()) {
@@ -316,6 +497,9 @@ pipeline {
                             # Stop MongoDB container
                             docker stop mongo-test || true
                             docker rm mongo-test || true
+                            
+                            # Clean up old Docker images
+                            docker image prune -f || true
                         '''
                     } else {
                         bat '''
@@ -325,6 +509,9 @@ pipeline {
                             REM Stop MongoDB container
                             docker stop mongo-test 2>nul || echo MongoDB container not running
                             docker rm mongo-test 2>nul || echo MongoDB container not found
+                            
+                            REM Clean up old Docker images
+                            docker image prune -f 2>nul || echo Docker cleanup skipped
                         '''
                     }
                 }
