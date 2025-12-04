@@ -1,0 +1,48 @@
+filebeat.inputs:
+  # Application logs
+  - type: log
+    enabled: true
+    paths:
+      - /logs/*.log
+    fields:
+      app: fusion-electronics
+      type: application
+    fields_under_root: true
+    
+  # Docker container logs
+  - type: container
+    enabled: true
+    paths:
+      - '/var/lib/docker/containers/*/*.log'
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+
+# Configure modules
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+# Output to Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+
+# Output directly to Elasticsearch (alternative - comment out if using Logstash)
+# output.elasticsearch:
+#   hosts: ["elasticsearch:9200"]
+#   username: "elastic"
+#   password: "fusionelk123"
+#   index: "fusion-filebeat-%{+yyyy.MM.dd}"
+
+# Kibana configuration
+setup.kibana:
+  host: "kibana:5601"
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
