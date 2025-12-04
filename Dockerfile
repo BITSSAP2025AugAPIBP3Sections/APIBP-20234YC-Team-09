@@ -1,33 +1,42 @@
-# 1) Build stage — compile the React app
-FROM node:18-alpine AS builder
+# Single Docker image for both frontend and backend
+FROM node:18-alpine
 
-LABEL org.opencontainers.image.description="Fusion Electronics Ecommerce Website frontend – a React SPA built with Material-UI, React-Router, Stripe integration and more."
+LABEL org.opencontainers.image.description="Fusion Electronics Full-Stack E-commerce Application - Combined Frontend & Backend"
 
 WORKDIR /app
 
-# Install deps
-COPY . .
-RUN npm ci
+# Copy package files for both frontend and backend
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
 
-# Copy sources and build
+# Install all dependencies
+RUN npm install --no-audit --prefer-offline
+
+# Copy backend source code
+COPY backend/ ./backend/
+
+# Copy frontend source code
 COPY public ./public
+COPY src ./src
+COPY craco.config.js jsconfig.json setupProxy.js ./
 
-COPY src    ./src
-
+# Build the frontend
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
-# 2) Production stage — serve static build via nginx
-FROM nginx:alpine
+# Create startup script
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'echo "🚀 Starting Fusion Electronics Full-Stack Application..."' >> /app/start.sh && \
+    echo 'echo "📂 Starting Backend Server on port 5000..."' >> /app/start.sh && \
+    echo 'cd /app/backend && npm start &' >> /app/start.sh && \
+    echo 'echo "⏳ Waiting for backend to initialize..."' >> /app/start.sh && \
+    echo 'sleep 5' >> /app/start.sh && \
+    echo 'echo "🌐 Starting Frontend Server on port 3000..."' >> /app/start.sh && \
+    echo 'cd /app && npm start' >> /app/start.sh && \
+    chmod +x /app/start.sh
 
-# Provide a human-readable description for the image
-LABEL org.opencontainers.image.description="Fusion Electronics Frontend – a React SPA built with Material-UI, React-Router, Stripe integration and more."
+# Expose both ports
+EXPOSE 3000 5000
 
-WORKDIR /usr/share/nginx/html
-
-# Remove default content, then copy in our build
-RUN rm -rf ./*
-COPY --from=builder /app/build ./
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Start both services
+CMD ["/app/start.sh"]

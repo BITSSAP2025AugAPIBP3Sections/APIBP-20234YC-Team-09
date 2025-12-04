@@ -85,6 +85,9 @@ sudo systemctl start jenkins
    
    # Linux/Mac
    cat /var/lib/jenkins/secrets/initialAdminPassword
+   
+   # Docker Jenkins
+   docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
    ```
 3. Install suggested plugins
 4. Create admin user

@@ -11,10 +11,17 @@ const orderRoutes = require('./routes/orders');
 const authRoutes = require('./routes/auth');
 const newsletterRoutes = require('./routes/newsletter');
 const { swaggerUi, swaggerSpec, setupSwaggerUi, setupSwaggerJson } = require('./docs/swagger');
+const logger = require('./logger'); // ELK logging
 
 // Create Express App
 const app = express();
 const PORT = process.env.PORT || 8000;
+
+// ELK: Log application startup
+logger.info('🚀 Fusion Electronics Backend starting...', {
+  port: PORT,
+  nodeEnv: process.env.NODE_ENV || 'development'
+});
 
 // Database Connection + Seed + Vector Sync + Server Start
 mongoose
@@ -65,6 +72,9 @@ mongoose
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ELK: Request logging middleware
+app.use(logger.middleware);
 
 // Setup Swagger UI with customized title
 setupSwaggerJson(app); // serves /api-docs/swagger.json

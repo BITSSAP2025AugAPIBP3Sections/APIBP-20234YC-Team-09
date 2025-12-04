@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # Selenium Hub - Central coordinator
+  selenium-hub:
+    image: selenium/hub:4.15.0
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+    environment:
+      - GRID_MAX_SESSION=16
+      - GRID_BROWSER_TIMEOUT=300
+      - GRID_TIMEOUT=300
+    networks:
+      - selenium-grid
+
+  # Chrome Node
+  chrome-node:
+    image: selenium/node-chrome:4.15.0
+    container_name: selenium-chrome
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - NODE_MAX_INSTANCES=2
+      - NODE_MAX_SESSION=2
+      - START_XVFB=true
+      - SE_VNC_NO_PASSWORD=1
+      - SE_SCREEN_WIDTH=1920
+      - SE_SCREEN_HEIGHT=1080
+      - DBUS_SESSION_BUS_ADDRESS=/dev/null
+    ports:
+      - "5900:5900"  # VNC port for Chrome
+      - "7900:7900"  # noVNC web interface for Chrome
+    volumes:
+      - /dev/shm:/dev/shm
+    shm_size: 2gb
+    networks:
+      - selenium-grid
+
+  # Firefox Node  
+  firefox-node:
+    image: selenium/node-firefox:4.15.0
+    container_name: selenium-firefox
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - NODE_MAX_INSTANCES=2
+      - NODE_MAX_SESSION=2
+      - START_XVFB=true
+      - SE_VNC_NO_PASSWORD=1
+      - SE_SCREEN_WIDTH=1920
+      - SE_SCREEN_HEIGHT=1080
+      - DBUS_SESSION_BUS_ADDRESS=/dev/null
+    ports:
+      - "5901:5900"  # VNC port for Firefox
+      - "7901:7900"  # noVNC web interface for Firefox
+    volumes:
+      - /dev/shm:/dev/shm
+    shm_size: 2gb
+    networks:
+      - selenium-grid
+
+  # Edge Node
+  edge-node:
+    image: selenium/node-edge:4.15.0
+    container_name: selenium-edge
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - NODE_MAX_INSTANCES=2
+      - NODE_MAX_SESSION=2
+      - START_XVFB=true
+      - SE_VNC_NO_PASSWORD=1
+      - SE_SCREEN_WIDTH=1920
+      - SE_SCREEN_HEIGHT=1080
+      - DBUS_SESSION_BUS_ADDRESS=/dev/null
+    ports:
+      - "5902:5900"  # VNC port for Edge
+      - "7902:7900"  # noVNC web interface for Edge
+    volumes:
+      - /dev/shm:/dev/shm
+    shm_size: 2gb
+    networks:
+      - selenium-grid
+
+networks:
+  selenium-grid:
+    driver: bridge
